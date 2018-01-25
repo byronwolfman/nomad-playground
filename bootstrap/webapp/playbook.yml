@@ -1,0 +1,14 @@
+---
+
+- hosts: all
+  tasks:
+
+    - name: Build docker images
+      docker_image:
+        path: "/vagrant/bootstrap/webapp/v{{ item }}"
+        name: webapp
+        tag: "{{ item }}"
+      with_items:
+        - 0.1
+        - 0.2
+        - 0.3

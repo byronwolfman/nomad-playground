@@ -1,0 +1,45 @@
+---
+
+- hosts: all
+  vars:
+    consul_version: 1.0.2
+  tasks:
+
+    - name: Create consul user
+      user:
+        name: consul
+        home: /opt/consul
+        shell: /sbin/nologin
+        system: yes
+
+    - name: Install consul
+      unarchive:
+        src: https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip
+        dest: /usr/bin
+        owner: root
+        group: consul
+        mode: '0750'
+        creates: /usr/bin/consul
+        remote_src: True
+
+    - name: Create consul config directory
+      file:
+        state: directory
+        path: /etc/consul.d
+        owner: consul
+        group: consul
+        mode: '0750'
+
+    - name: Create consul systemd unit file
+      copy:
+        src: consul.service
+        dest: /usr/lib/systemd/system/consul.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Start consul agent
+      systemd:
+        name: consul
+        state: started
+        daemon_reload: True

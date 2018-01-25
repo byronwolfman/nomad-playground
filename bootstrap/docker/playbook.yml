@@ -1,0 +1,30 @@
+---
+
+- hosts: all
+  tasks:
+
+    - name: Add docker yum repo
+      copy:
+        src: docker.repo
+        dest: /etc/yum.repos.d/docker.repo
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install docker engine
+      yum:
+        name: docker-engine
+        enablerepo: dockerrepo
+
+    - name: Enable IP forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        state: present
+        value: 1
+        sysctl_set: True
+        reload: True
+
+    - name: Start docker daemon
+      systemd:
+        name: docker
+        state: started

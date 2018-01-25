@@ -1,0 +1,55 @@
+---
+
+- hosts: all
+  vars:
+    nomad_version: 0.7.1
+  tasks:
+
+    - name: Create nomad user
+      user:
+        name: nomad
+        home: /opt/nomad
+        shell: /sbin/nologin
+        system: yes
+        groups: docker
+        append: yes
+
+    - name: Install nomad
+      unarchive:
+        src: https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_amd64.zip
+        dest: /usr/bin
+        owner: root
+        group: nomad
+        mode: '0750'
+        creates: /usr/bin/nomad
+        remote_src: True
+
+    - name: Create nomad config directory
+      file:
+        state: directory
+        path: /etc/nomad.d
+        owner: nomad
+        group: nomad
+        mode: '0750'
+
+    - name: 'Configure nomad'
+      copy:
+        src: nomad.hcl
+        dest: /etc/nomad.d/nomad.hcl
+        owner: nomad
+        group: nomad
+        mode: '0644'
+
+    - name: Create nomad systemd unit file
+      copy:
+        src: nomad.service
+        dest: /usr/lib/systemd/system/nomad.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Start nomad agent
+      systemd:
+        name: nomad
+        state: started
+        daemon_reload: True
