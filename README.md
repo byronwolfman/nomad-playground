@@ -2,15 +2,15 @@
 
 [Nomad](https://www.nomadproject.io/) is a general-purpose application scheduler. I put this repo together so that I could experiment with Nomad's job specifications and poke at its boundaries and answer some questions. What _actually_ happens in a rolling update? At what point are canaries registered with Consul? When are the old processes de-registered? What happens if I roll out a flaky poller?
 
-This repo has everything you need to start answering some of these questions:
+This repo has everything you need to start answering these questions:
 
 * A Vagrantfile to fire up the test environment with:
   * CentOS 7, as you might find in many businesses
   * Docker CE
   * Consul running in dev mode
   * Nomad running in dev mode
-* Some toy "microservices" which are built inside the Vagrantbox
-* Some start jobspec files
+* Some toy "microservices" which are built inside the VM
+* Some starter jobspec files
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ This will take a few minutes as the Vagrantbox installs some software and runs s
 
     laptop $ vagrant ssh
 
-Become root inside the box and move to the `/vagrant` directory:
+Become root inside the VM and move to the `/vagrant` directory:
 
     [vagrant@localhost ~]$ sudo -i
     [root@localhost ~]# cd /vagrant
@@ -55,7 +55,7 @@ Introspect your new containers:
 There are several jobspec files to choose from, each mimicking a particular function you might see performed by a microservice:
 
 1. `job-files/web.nomad` launches several web containers. The update stanza is designed to use a blue/green stategy with manual promotion and zero downtime. Watch the Consul catalog and Docker's `ps` during a deploy to see how this is done. Crashed containers should be restarted by Nomad. The "webserver" is actually just netcat; the unmodified version can be found in [this repo](https://github.com/benrady/shinatra).
-1. `job-files/poller.nomad` launches pretend poller containers. They don't do anything but occasionally output text to stdout. Think of this as a mock sidekiq or celery. Crashed poller should be restarted by Nomad.
+1. `job-files/poller.nomad` launches pretend poller containers. They don't do anything but occasionally output text to stdout. Think of this as a mock sidekiq or celery. Crashed containers should be restarted by Nomad.
 1. `job-files/migration.nomad` uses the batch scheduler to run a single job that, when complete, does not reschedule itself. Unlike the web and poller jobspec files, this one does not attempt to restart itself if it fails.
 1. `job-files/cron.nomad` uses the `periodic` stanza to fire off batch jobs at regularly-scheduled intervals. Periodic jobs are interesting because they are jobs that _create other jobs;_ if this seems confusing, try invoking `nomad job status` after a few minutes. Nomad will attempt to restart a crashed cron job multiple times, but it will eventually give up.
 
