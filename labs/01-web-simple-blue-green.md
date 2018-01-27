@@ -135,7 +135,7 @@ Nomad agents are in fact API servers; the CLI's job is just to interact with tha
 
 ### Further Reading
 
-[Jobspec update stanza](https://www.nomadproject.io/docs/job-specification/update.html)
-[Jobspec task shutdown_delay](https://www.nomadproject.io/docs/job-specification/task.html#shutdown_delay)
-[Jobs HTTP API](https://www.nomadproject.io/api/jobs.html)
-[Deployments HTTP API](https://www.nomadproject.io/api/deployments.html)
+* [Jobspec update stanza](https://www.nomadproject.io/docs/job-specification/update.html)
+* [Jobspec task shutdown_delay](https://www.nomadproject.io/docs/job-specification/task.html#shutdown_delay)
+* [Jobs HTTP API](https://www.nomadproject.io/api/jobs.html)
+* [Deployments HTTP API](https://www.nomadproject.io/api/deployments.html)
