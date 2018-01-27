@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/centos-7.4"
   config.vm.synced_folder '.', '/vagrant'
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "4096"
+    vb.memory = "2048"
   end
 
   config.vm.provision "shell", path: "#{BASE_DIR}/bootstrap/base.sh"
