@@ -114,6 +114,7 @@ To find out, play with `auto_revert` being present or absent while also playing 
 
 Nomad agents are in fact API servers; the CLI's job is just to interact with that API. You can look inside yourself:
 
+```
 [root@localhost vagrant]# curl -Ss localhost:4646/v1/job/webapp-web/deployment | python -m json.tool
 {
     "CreateIndex": 392,
