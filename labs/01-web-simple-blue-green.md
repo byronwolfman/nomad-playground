@@ -127,8 +127,8 @@ Nomad agents are in fact API servers; the CLI's job is just to interact with tha
   localhost:4646/v1/deployment/promote/1b9cd23a-c1bc-53a6-8378-7c3778c40b52 \
   -X POST \
   --data '{
-    "DeploymentID": "1b9cd23a-c1bc-53a6-8378-7c3778c40b52",
-    "All": true
+      "DeploymentID": "1b9cd23a-c1bc-53a6-8378-7c3778c40b52",
+      "All": true
     }' \
   | python -m json.tool
 {
