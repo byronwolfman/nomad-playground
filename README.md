@@ -59,7 +59,7 @@ There are several jobspec files to choose from, each mimicking a particular func
 1. `job-files/migration.nomad` uses the batch scheduler to run a single job that, when complete, does not reschedule itself. Unlike the web and poller jobspec files, this one does not attempt to restart itself if it fails.
 1. `job-files/cron.nomad` uses the `periodic` stanza to fire off batch jobs at regularly-scheduled intervals. Periodic jobs are interesting because they are jobs that _create other jobs;_ if this seems confusing, try invoking `nomad job status` after a few minutes. Nomad will attempt to restart a crashed cron job multiple times, but it will eventually give up.
 
-Much of Nomad's behaviour towards misbehaving processes (including the actions described above) are modifiable, which is what this playground is all about!
+Much of Nomad's behaviour towards misbehaving processes (including the actions described above) are modifiable, which is what this playground is all about! Guided labs are provided in the [labs](https://github.com/byronwolfman/nomad-playground/tree/master/labs) directory but may be ignored in favour of freeform experimentation too.
 
 ### Variants
 
