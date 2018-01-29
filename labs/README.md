@@ -1,6 +1,6 @@
 # Labs
 
-At the current time of writing there is just "lab" and not "labs." Each lab will have (broadly speaking) three parts:
+There aren't many labs now, but this will gradually change. Each lab will have (broadly speaking) three parts:
 
 1. A question, e.g. "how do I do X?"
 1. A tutorial demonstrating the answer and justifications
