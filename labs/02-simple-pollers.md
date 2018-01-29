@@ -101,7 +101,7 @@ To summarize: we're setting `max_parallel` back to 1 to get our rolling updates 
 
 Let's imagine that someone has checked in some bad code and now the poller crashes shortly after initialization. Run `nomad run job-files/poller.nomad` to watch what happens.
 
-At the end of it all, Nomad's status description will read "Deployment completely successfully" -- but not so fast! If you were watching closely, you'll notice in the `docker ps` Window that one of the containers running version 0.1 never stopped, and the newer container has the same image ID. Look closer:
+At the end of it all, Nomad's status description will read "Deployment completely successfully" -- but not so fast! If you were watching closely, you'll notice in the `docker ps` window that one of the containers running version 0.1 never stopped, and the newer container has the same image ID. Look closer:
 
 ```
 [root@localhost ~]# nomad logs -job webapp-poller
@@ -120,11 +120,11 @@ ID        Job ID         Job Version  Status      Description
 a980ca64  webapp-poller  7            failed      Failed due to unhealthy allocations - rolling back to job version 6
 ```
 
-Version 0.3 has a flaw that causes it to exit with a non-zero return code after 15 seconds. Nomad doesn't have a magic way of knowing whether or not a poller is throwing (handled) exceptions. The one thing it can introspect: a program that crashes. By setting `min_healthy_time = "30s"` what we're really saying is that the poller is healthy as long as it can execute for at least 30 seconds.
+Version 0.3 has a flaw that causes it to exit with a non-zero return code after 15 seconds. Nomad doesn't have a magic way of knowing whether or not a poller is throwing (handled) exceptions. The one thing it will notice: a program that crashes. By setting `min_healthy_time = "30s"` what we're really saying is that the poller is healthy as long as it can execute without exiting for 30 seconds.
 
-We also had `auto_revert = true` which means that when the deployment failed, Nomad automatically re-ran the last deployment. It's this second, automatic deployment that `nomad status` shows as having succeeded, not the version 0.3 update we tried to push.
+We also have `auto_revert = true` which means that when the deployment failed, Nomad automatically re-deployed the previous healthy version of the job. It is this second, automatic deployment that `nomad status` shows as having succeeded, not the version 0.3 update we tried to push.
 
-Finally, `healthy_deadline = "1m"` has a role to play too: regardless of what the `restart` stanza specifies, the version 0.3 poller gets 1 minute _total_ throughout the whole deployment process to start a healthy version of itself. If you do the math, the poller crashes every 15 seconds and has a 10 second cool-down between attempts, which is why we see this timeline:
+Finally, `healthy_deadline = "1m"` has a role to play too: regardless of what the `restart` stanza specifies, the version 0.3 poller gets 1 minute _total_ throughout the whole deployment process to start a healthy version of each container in the rolling deploy. If you do the math, the poller crashes every 15 seconds and has a 10 second cool-down between attempts, which is why we see this timeline:
 
 * 0s: poller starts (first attempt)
 * 15s: poller fails
@@ -133,17 +133,17 @@ Finally, `healthy_deadline = "1m"` has a role to play too: regardless of what th
 * 50s: poller starts (third attempt)
 * 60s: Nomad rolls back
 
-The actual time will drift by a few seconds since scheduling is not instantaneous. Interestingly, Nomad does not wait for the poller to reach `min_healthy_time` on its third attempt; the 1 minute mark has been reached which is all that matters. I've picked some of these thresholds for lab expediency, but it seems that there should be some care taken in choosing thresholds for production-bound workloads.
+The actual time will drift by a few seconds since scheduling is not instantaneous. Interestingly, Nomad does not wait for the poller to reach `min_healthy_time` on its third attempt; once the 1 minute mark has been reached it will roll back. I've picked some of these thresholds for lab expediency, but it seems that there should be some care taken in choosing thresholds for production-bound workloads.
 
 ### Part 3: Post-Update Failures
 
-Of course, we only detected this failure during the rolling update because of the 30 second `min_healthy_time` threshold. If that threshold were shorter, the poller would have deployed and crashed. Let's see how that's handled. With the the flaky 0.3 code still in the jobspec file, adjust it so that `min_healthy_time = "10s"` and then execute `nomad run job-files/poller.nomad`.
+Of course, we only detected this failure during the rolling update because of the 30 second `min_healthy_time` threshold. If that threshold were shorter, the poller would have deployed "successfully" but still crashed. Let's see how that's handled. With the the flaky 0.3 code still in the jobspec file, adjust it so that `min_healthy_time = "10s"` and then execute `nomad run job-files/poller.nomad`.
 
 The results are kind of funny, but don't laugh too hard: you could be operating this!
 
-The deployment "succeeds" but the pollers crash over and over again. Eventually around the 5 minute mark (though it may vary based on your system's ability to multitask) Nomad stops starting the pollers, and `nomad status` shows them pending. This is the result of the `restart` stanza for the job itself. To prevent non-stop churning, we've told Nomad that it can make up to 10 restart attempts over the course of 10 minutes, with a 10 second delay between each. If we use up all of our attempts before 10 minutes is up, then no more attempts are made until that 10 minute period passes.
+The deployment "succeeds" but the pollers crash over and over again. Eventually around the 5 minute mark (though it may vary based on your system's ability to multitask) Nomad gives up on starting the pollers, and `nomad status` shows them pending. This is the result of the `restart` stanza for the job itself. To prevent non-stop churning, we've told Nomad that it can make up to 10 restart attempts over the course of 10 minutes, with a 10 second delay between each. If we use up all of our attempts before 10 minutes is up, then no more attempts are made until that 10 minute interval passes.
 
-It bears pointing out that the 10 minute countdown begins the first time a restart is issued; this isn't a 10 minute cooldown since the last restart. If you watch the "Created" column in `nomad status` you'll see that once it edges past the 10 minute mark, Nomad begins scheduling containers again.
+It bears pointing out that the 10 minute countdown begins the first time a restart is issued, not that last one. If you watch the "Created" column in `nomad status` you'll see that once it edges past the 10 minute mark, Nomad begins scheduling containers again. It helps to say it out loud: "don't attempt to restart the container more than 10 times within a 10 minute window."
 
 Anyway, this is obviously bad, so let's revert:
 
@@ -166,7 +166,7 @@ Run `nomad run job-files/poller.nomad` to get us back to a good place.
 
 Have you noticed something about the name of the command? It's `/poller_graceful.sh` because it knows how to handle SIGTERM! Nomad (via Docker) sends containers SIGTERM when it's shutting down an outgoing container (note that Nomad doesn't just schedule containers, and sends a [different signal](https://www.nomadproject.io/docs/operating-a-job/update-strategies/handling-signals.html) in such cases).
 
-Start following the logs with `nomad logs -f -job webapp-poller` and then doing a rolling update from version 0.1 to 0.2. The poller will indicate that it's received SIGTERM and then exit immediately. That's just polite. Not all programs know what to do with SIGTERM though. Update the jobspec file:
+Start following the logs with `nomad logs -f -job webapp-poller` and then doing a rolling update from version 0.1 to 0.2. The poller will indicate that it's received SIGTERM and then exit immediately. That's just polite. Not all programs know what to do with SIGTERM though. Now update the jobspec file again because we need to know how an impolite process behaves:
 
 ```
      task "poller" {
@@ -179,9 +179,9 @@ Start following the logs with `nomad logs -f -job webapp-poller` and then doing 
        }
 ```
 
-Deploy again with `nomad run job-files/poller.nomad`. At first, nothing should be significantly different. After all, the impolite poller was the one that was _started,_ not _stopped_ this time. Start tailing logs with `nomad logs -f -job webapp-poller` and roll the version between 0.2 and 0.1 again, while watching the `docker ps` and `nomad status` windows as well.
+Deploy again with `nomad run job-files/poller.nomad`. At first, nothing should be significantly different. After all, the impolite poller was the one that was _started,_ not _stopped_ with this deploy. Start tailing logs with `nomad logs -f -job webapp-poller` and roll the version between 0.2 and 0.1 again, while watching the `docker ps` and `nomad status` windows as well.
 
-The poller just keeps going. To be fair, this poller was written to explicitly ignore SIGTERM so that it would be logged. Some apps won't necessarily catch and handle SIGTERM; they'll just keep going without any outward indication. Nomad (or rather, Docker) gives the container 10 seconds to finish whatever it's doing. If it hasn't stopped of its own accord by then, it is send SIGKILL (and SIGKILL means business).
+The poller wants to keep going. To be fair, this poller was written to explicitly ignore SIGTERM so that it would be logged. Some apps won't necessarily catch and handle SIGTERM; they'll just keep going without any outward indication. Nomad (or rather, Docker) gives the container 10 seconds to finish whatever it's doing. If it hasn't stopped of its own accord by then, it will send SIGKILL (and SIGKILL means business).
 
 If 10 seconds isn't enough, the [kill_timeout](https://www.nomadproject.io/docs/operating-a-job/update-strategies/handling-signals.html) option allows you to set a longer grace period.
 
