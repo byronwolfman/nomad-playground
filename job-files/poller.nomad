@@ -15,7 +15,7 @@ job "webapp-poller" {
     count = 2
     restart {
       attempts = 10
-      interval = "5m"
+      interval = "10m"
       delay = "10s"
       mode = "delay"
     }
