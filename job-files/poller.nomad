@@ -5,7 +5,7 @@ job "webapp-poller" {
 
   update {
     max_parallel = 1
-    min_healthy_time = "5s"
+    min_healthy_time = "15s"
     healthy_deadline = "1m"
     auto_revert = true
   }
