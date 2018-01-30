@@ -152,5 +152,5 @@ Rever the jobspec file to default, then switch to version 0.3 and:
 
 ### Further Reading
 
-[Batch Scheduler](https://www.nomadproject.io/docs/runtime/schedulers.html#batch)
-[Job Interpolation](https://www.nomadproject.io/docs/runtime/interpolation.html)
+* [Batch Scheduler](https://www.nomadproject.io/docs/runtime/schedulers.html#batch)
+* [Job Interpolation](https://www.nomadproject.io/docs/runtime/interpolation.html)
