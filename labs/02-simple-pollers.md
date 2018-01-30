@@ -210,3 +210,7 @@ Try switching back and forth between version 0.1 and 0.2 with the following chan
 
 * Use `/poller_impolite.sh` with a long [kill_timeout](https://www.nomadproject.io/docs/operating-a-job/update-strategies/handling-signals.html)
 * Use `/poller_graceful.sh` with a long [kill_timeout](https://www.nomadproject.io/docs/operating-a-job/update-strategies/handling-signals.html)
+
+### Further Reading
+
+* [Jobspec update stanza](https://www.nomadproject.io/docs/job-specification/update.html)
