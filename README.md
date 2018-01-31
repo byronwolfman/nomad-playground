@@ -52,12 +52,12 @@ Introspect your new containers:
 
 ## Next Steps
 
-There are several jobspec files to choose from, each mimicking a particular function you might see performed by a microservice:
+The [labs](https://github.com/byronwolfman/nomad-playground/tree/master/labs) directory in this repo provides several guided labs to explore Nomad's scheduling behaviour. These labs make use of a "webapp" container with different executables inside, each mimicking a particular function you might see performed by a microservice:
 
 1. `job-files/web.nomad` launches several web containers. The update stanza is designed to use a blue/green stategy with manual promotion and zero downtime. Watch the Consul catalog and Docker's `ps` during a deploy to see how this is done. Crashed containers should be restarted by Nomad. The "webserver" is actually just netcat; the unmodified version can be found in [this repo](https://github.com/benrady/shinatra).
 1. `job-files/poller.nomad` launches pretend poller containers. They don't do anything but occasionally output text to stdout. Think of this as a mock sidekiq or celery. Crashed containers should be restarted by Nomad.
 1. `job-files/migration.nomad` uses the batch scheduler to run a single job that, when complete, does not reschedule itself. Unlike the web and poller jobspec files, this one does not attempt to restart itself if it fails.
-1. `job-files/cron.nomad` uses the `periodic` stanza to fire off batch jobs at regularly-scheduled intervals. Periodic jobs are interesting because they are jobs that _create other jobs;_ if this seems confusing, try invoking `nomad job status` after a few minutes. Nomad will attempt to restart a crashed cron job multiple times, but it will eventually give up.
+1. `job-files/cron.nomad` uses the `periodic` stanza to fire off batch jobs at regularly-scheduled intervals. Periodic jobs are interesting because they are jobs that _create other jobs;_ if this seems confusing, try invoking `nomad job status` a few minutes after running this job file. Nomad will attempt to restart a crashed cron job multiple times, but it will eventually give up.
 
 Much of Nomad's behaviour towards misbehaving processes (including the actions described above) are modifiable, which is what this playground is all about! Guided labs are provided in the [labs](https://github.com/byronwolfman/nomad-playground/tree/master/labs) directory but may be ignored in favour of freeform experimentation too.
 
