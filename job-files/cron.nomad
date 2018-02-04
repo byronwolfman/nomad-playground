@@ -9,7 +9,6 @@ job "webapp-cron" {
   }
 
   group "cron" {
-
     count = 1
     restart {
       attempts = 10
