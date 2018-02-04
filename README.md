@@ -52,7 +52,7 @@ Introspect your new containers:
 
 ## Next Steps
 
-The [labs](https://github.com/byronwolfman/nomad-playground/tree/master/labs) directory in this repo provides several guided labs to explore Nomad's scheduling behaviour. These labs make use of a "webapp" container with different executables inside, each mimicking a particular function you might see performed by a microservice:
+Several guided [labs](https://github.com/byronwolfman/nomad-playground/tree/master/labs) are provided to explore Nomad's scheduling behaviour. These labs make use of an included "webapp" docker image with different executables inside, each mimicking a particular function you might see performed by a microservice:
 
 1. `job-files/web.nomad` launches several web containers. The update stanza is designed to use a blue/green stategy with manual promotion and zero downtime. Watch the Consul catalog and Docker's `ps` during a deploy to see how this is done. Crashed containers should be restarted by Nomad. The "webserver" is actually just netcat; the unmodified version can be found in [this repo](https://github.com/benrady/shinatra).
 1. `job-files/poller.nomad` launches pretend poller containers. They don't do anything but occasionally output text to stdout. Think of this as a mock sidekiq or celery. Crashed containers should be restarted by Nomad.

@@ -51,7 +51,7 @@ Without making any changes to the jobspec file, run `nomad run job-files/migrati
          image = "webapp:0.1"
 ```
 
-Now run `nomad run job-files/migration.nomad` again; the batch job will run again. If you rever the change, you can re-run the batch job again! It seems that if you want to run a batch job more than once, you'll need to change the jobspec file in some way. Incrementing the task with a unix timestamp is one method; is there another? Yep:
+Now run `nomad run job-files/migration.nomad` again; the batch job will run again. If you revert the change, you can re-run the batch job again! It seems that if you want to run a batch job more than once, you'll need to change the jobspec file in some way. Incrementing the task with a unix timestamp is one method; is there another? Yep:
 
 ```
        env {
@@ -144,7 +144,7 @@ While switching back and forth between version 0.1 and 0.2 (or making any minor 
   * Run this again; does the scheduler attempt to re-run both containers, or just one?
 * Revert the job to normal and execute with `count = 1`; immediately set `count = 2` and re-execute before the first batch job finishes
 
-Rever the jobspec file to default, then switch to version 0.3 and:
+Revert the jobspec file to default, then switch to version 0.3 and:
 
 * Set `attempts = 1`
 * Set `mode = "delay"`
