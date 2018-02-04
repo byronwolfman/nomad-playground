@@ -142,6 +142,7 @@ While switching back and forth between version 0.1 and 0.2 (or making any minor 
 * Does setting increasing the count from 1 to 3 run all 3 jobs, or just the difference of 2?
 * With `count = 2` set `command = "sh"` and below that use `args = ["-c", "sleep 1 && exit ${NOMAD_ALLOC_INDEX}"]`
   * Run this again; does the scheduler attempt to re-run both containers, or just one?
+* Revert the job to normal and execute with `count = 1`; immediately set `count = 2` and re-execute before the first batch job finishes
 
 Rever the jobspec file to default, then switch to version 0.3 and:
 
