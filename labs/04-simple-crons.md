@@ -36,7 +36,7 @@ Overlapping and non-overlapping jobs are easy to conceptualize about, but it's f
 
 1. One session running `watch docker ps`
 1. One session running `watch nomad status`
-1. One session running `watch nomad status webapp-cron
+1. One session running `watch nomad status webapp-cron`
 
 With those in view, execute `nomad run job-files/cron.nomad` and keep an eye on the other windows.
 
