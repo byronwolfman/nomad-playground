@@ -2,7 +2,7 @@
 
 # Install base dependencies
 yum install -y \
-  ansible-2.4.1.0 \
+  ansible \
   bind-utils \
   epel-release \
   unzip
